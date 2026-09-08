@@ -6,7 +6,7 @@ async function bootstrap() {
   app.enableCors({
   origin: [
     'http://localhost:3000',
-    'https://weekly-report-hkxje0wtr-malshika-insaris-projects.vercel.app',
+    'https://weekly-report-app-lac.vercel.app',
   ],
   credentials: true,
 });
