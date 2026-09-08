@@ -3,7 +3,7 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import * as bcrypt from 'bcryptjs';
 
 const adapter = new PrismaPg({
-  connectionString: 'postgresql://postgres:loanpass123@localhost:5432/weekly_report_db',
+  connectionString: process.env.DATABASE_URL!,
 });
 const prisma = new PrismaClient({ adapter });
 
