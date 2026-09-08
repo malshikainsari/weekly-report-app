@@ -10,6 +10,8 @@ A full-stack web application for managing weekly team reports with role-based ac
 - **AI:** Groq API (llama3)
 - **Auth:** JWT
 
+---
+
 ## Setup Instructions
 
 ### Prerequisites
@@ -38,7 +40,8 @@ npm install
 ### 2. Running the Database
 
 1. Create a PostgreSQL database named `weekly_report_db`
-2. Create `backend/prisma7.config.ts` and add your database URL:
+
+2. Inside the `backend` folder, create a file named `prisma7.config.ts` and add your database URL:
 
 ```ts
 import { defineConfig } from 'prisma'
@@ -50,11 +53,19 @@ export default defineConfig({
 })
 ```
 
-3. Run migrations and seed:
+> Replace `USER` and `PASSWORD` with your PostgreSQL credentials.
+
+3. Run migrations:
 
 ```bash
 cd backend
 npx prisma migrate deploy
+```
+
+4. Seed the database with sample data:
+
+```bash
+cd backend
 npx prisma db seed
 ```
 
@@ -82,6 +93,19 @@ Frontend runs on: `http://localhost:3000`
 
 ---
 
+## Running Tests
+
+```bash
+cd backend
+npm run test
+```
+
+### Test Coverage
+- Role-based access control (RBAC) logic
+- Report service unit tests
+
+---
+
 ## Seed Users
 
 | Email | Password | Role |
@@ -95,12 +119,12 @@ Frontend runs on: `http://localhost:3000`
 
 ## Features
 
-- Role-based access (Team Member / Manager)
-- Weekly report creation with tasks, blockers, achievements
-- Report review workflow: Draft → Submitted → Needs Correction → Approved
-- Version history per report
-- Manager dashboard with charts (Recharts)
-- AI chat assistant (Groq API)
-- Team section view (side-by-side blockers/achievements)
-- Projects & categories management
-- User management
+- **Authentication:** JWT-based login with role-based access control (Team Member / Manager)
+- **Weekly Reports:** Create reports with tasks, blockers, achievements, hours breakdown, and optional notes/links
+- **Review Workflow:** Draft → Submitted → Needs Correction → Approved
+- **Version History:** Every correction cycle saves a new version; managers can view all past versions
+- **Manager Dashboard:** Summary metrics, charts (status distribution, reports by member, time by task type, workload by project), submission compliance, and recent activity feed
+- **Team Section View:** Side-by-side view of blockers, achievements, or next week tasks across all team members for a selected week
+- **AI Chat Assistant:** Groq-powered assistant for managers to query team activity, blockers, and generate weekly summaries
+- **Projects & Categories:** Full CRUD with team member assignment
+- **User Management:** Invite users, view roles, access team member profiles
