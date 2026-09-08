@@ -41,7 +41,7 @@ npm install
 
 1. Create a PostgreSQL database named `weekly_report_db`
 
-2. Inside the `backend` folder, create a file named `prisma7.config.ts` and add your database URL:
+2. Inside the `backend` folder, create a file named `prisma7.config.ts` with the following content:
 
 ```ts
 import { defineConfig } from 'prisma'
@@ -53,7 +53,7 @@ export default defineConfig({
 })
 ```
 
-> Replace `USER` and `PASSWORD` with your PostgreSQL credentials.
+> Replace `USER` and `PASSWORD` with the PostgreSQL credentials configured on the local machine.
 
 3. Run migrations:
 
