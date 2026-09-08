@@ -2,6 +2,13 @@
 
 A full-stack web application for managing weekly team reports with role-based access control, review workflows, and AI-powered insights.
 
+## Live Demo
+
+- **Frontend:** https://weekly-report-app-lac.vercel.app
+- **Backend API:** https://weekly-report-backend-i34o.onrender.com
+
+> Note: The backend is hosted on Render's free tier and may take up to 50 seconds to wake up on the first request.
+
 ## Tech Stack
 
 - **Frontend:** Next.js 14, Tailwind CSS, Recharts
