@@ -1,0 +1,175 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Role {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  users     User[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("roles")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  passwordHash  String
+  roleId        String
+  role          Role      @relation(fields: [roleId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  reports       Report[]
+  reviewComments ReviewComment[]
+  statusChanges  ReportStatusHistory[]
+  userProjects   UserProject[]
+
+  @@map("users")
+}
+
+model Project {
+  id          String        @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  reports     Report[]
+  userProjects UserProject[]
+
+  @@map("projects")
+}
+
+model UserProject {
+  userId     String
+  projectId  String
+  assignedAt DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+  project    Project  @relation(fields: [projectId], references: [id])
+
+  @@id([userId, projectId])
+  @@map("user_projects")
+}
+
+model Report {
+  id            String    @id @default(uuid())
+  userId        String
+  projectId     String?
+  weekStart     DateTime
+  weekEnd       DateTime
+  status        String    @default("DRAFT")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  user          User      @relation(fields: [userId], references: [id])
+  project       Project?  @relation(fields: [projectId], references: [id])
+  versions      ReportVersion[]
+  statusHistory ReportStatusHistory[]
+
+  @@unique([userId, weekStart])
+  @@map("reports")
+}
+
+model ReportVersion {
+  id            String    @id @default(uuid())
+  reportId      String
+  versionNumber Int
+  notes         String?
+  links         String?
+  submittedAt   DateTime  @default(now())
+  report        Report    @relation(fields: [reportId], references: [id])
+  tasks         Task[]
+  plannedTasks  PlannedTask[]
+  blockers      Blocker[]
+  achievements  Achievement[]
+  hoursBreakdown HoursBreakdown[]
+  reviewComments ReviewComment[]
+
+  @@map("report_versions")
+}
+
+model Task {
+  id              String        @id @default(uuid())
+  reportVersionId String
+  name            String
+  priority        String
+  plannedPct      Int
+  actualPct       Int
+  status          String
+  timePlanned     Float
+  timeSpent       Float
+  deliverable     String?
+  reportVersion   ReportVersion @relation(fields: [reportVersionId], references: [id])
+
+  @@map("tasks")
+}
+
+model PlannedTask {
+  id              String        @id @default(uuid())
+  reportVersionId String
+  taskName        String
+  priority        String?
+  description     String?
+  reportVersion   ReportVersion @relation(fields: [reportVersionId], references: [id])
+
+  @@map("planned_tasks")
+}
+
+model Blocker {
+  id              String        @id @default(uuid())
+  reportVersionId String
+  description     String
+  isKeyIssue      Boolean       @default(false)
+  reportVersion   ReportVersion @relation(fields: [reportVersionId], references: [id])
+
+  @@map("blockers")
+}
+
+model Achievement {
+  id                String        @id @default(uuid())
+  reportVersionId   String
+  description       String
+  isKeyAchievement  Boolean       @default(false)
+  reportVersion     ReportVersion @relation(fields: [reportVersionId], references: [id])
+
+  @@map("achievements")
+}
+
+model HoursBreakdown {
+  id              String        @id @default(uuid())
+  reportVersionId String
+  taskType        String
+  hours           Float
+  reportVersion   ReportVersion @relation(fields: [reportVersionId], references: [id])
+
+  @@map("hours_breakdown")
+}
+
+model ReviewComment {
+  id              String        @id @default(uuid())
+  reportVersionId String
+  managerId       String
+  comment         String
+  createdAt       DateTime      @default(now())
+  reportVersion   ReportVersion @relation(fields: [reportVersionId], references: [id])
+  manager         User          @relation(fields: [managerId], references: [id])
+
+  @@map("review_comments")
+}
+
+model ReportStatusHistory {
+  id         String   @id @default(uuid())
+  reportId   String
+  changedBy  String
+  status     String
+  comment    String?
+  createdAt  DateTime @default(now())
+  report     Report   @relation(fields: [reportId], references: [id])
+  user       User     @relation(fields: [changedBy], references: [id])
+
+  @@map("report_status_history")
+}
