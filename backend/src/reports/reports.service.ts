@@ -31,24 +31,26 @@ export class ReportsService {
     });
   }
 
-  async getAllReports(filters: any) {
-    const where: any = {};
-    if (filters.userId) where.userId = filters.userId;
-    if (filters.projectId) where.projectId = filters.projectId;
-    if (filters.status) where.status = filters.status;
-    if (filters.weekStart) where.weekStart = { gte: new Date(filters.weekStart) };
-    if (filters.weekEnd) where.weekEnd = { lte: new Date(filters.weekEnd) };
+async getAllReports(filters: any) {
+  const where: any = {
+    status: { not: 'DRAFT' },
+  };
+  if (filters.userId) where.userId = filters.userId;
+  if (filters.projectId) where.projectId = filters.projectId;
+  if (filters.status) where.status = filters.status;
+  if (filters.weekStart) where.weekStart = { gte: new Date(filters.weekStart) };
+  if (filters.weekEnd) where.weekEnd = { lte: new Date(filters.weekEnd) };
 
-    return this.prisma.report.findMany({
-      where,
-      include: {
-        user: { include: { role: true } },
-        project: true,
-        versions: { orderBy: { versionNumber: 'desc' }, take: 1 },
-      },
-      orderBy: { weekStart: 'desc' },
-    });
-  }
+  return this.prisma.report.findMany({
+    where,
+    include: {
+      user: { include: { role: true } },
+      project: true,
+      versions: { orderBy: { versionNumber: 'desc' }, take: 1 },
+    },
+    orderBy: { weekStart: 'desc' },
+  });
+}
 
   async getReportById(id: string, userId?: string, isManager?: boolean) {
     const report = await this.prisma.report.findUnique({
