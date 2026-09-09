@@ -30,8 +30,9 @@ export class ProjectsService {
   }
 
   async delete(id: string) {
-    return this.prisma.project.delete({ where: { id } });
-  }
+  await this.prisma.userProject.deleteMany({ where: { projectId: id } });
+  return this.prisma.project.delete({ where: { id } });
+}
 
   async assignUser(projectId: string, userId: string) {
     return this.prisma.userProject.upsert({
