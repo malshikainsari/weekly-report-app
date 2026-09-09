@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://weekly-report-backend-i34o.onrender.com',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://weekly-report-backend-i34o.onrender.com',
 });
 
 api.interceptors.request.use((config) => {

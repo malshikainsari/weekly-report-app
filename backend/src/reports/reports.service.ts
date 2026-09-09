@@ -97,11 +97,21 @@ export class ReportsService {
         versionNumber,
         notes: versionData.notes,
         links: versionData.links,
-        tasks: { create: versionData.tasks || [] },
-        plannedTasks: { create: versionData.plannedTasks || [] },
-        blockers: { create: versionData.blockers || [] },
-        achievements: { create: versionData.achievements || [] },
-        hoursBreakdown: { create: versionData.hoursBreakdown || [] },
+       tasks: {
+  create: (versionData.tasks || []).map(({ id, reportVersionId, ...rest }: any) => rest),
+},
+plannedTasks: {
+  create: (versionData.plannedTasks || []).map(({ id, reportVersionId, ...rest }: any) => rest),
+},
+blockers: {
+  create: (versionData.blockers || []).map(({ id, reportVersionId, ...rest }: any) => rest),
+},
+achievements: {
+  create: (versionData.achievements || []).map(({ id, reportVersionId, ...rest }: any) => rest),
+},
+hoursBreakdown: {
+  create: (versionData.hoursBreakdown || []).map(({ id, reportVersionId, ...rest }: any) => rest),
+},
       },
     });
 
