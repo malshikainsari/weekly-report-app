@@ -13,6 +13,15 @@ export default function ReportsPage() {
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState({ weekStart: '', weekEnd: '', projectId: '' });
   const [error, setError] = useState('');
+  const handleDelete = async (id: string) => {
+  if (!confirm('Delete this report?')) return;
+  try {
+    await api.delete(`/api/reports/${id}`);
+    setReports(prev => prev.filter(r => r.id !== id));
+  } catch (err: any) {
+    alert(err.response?.data?.message || 'Failed to delete report');
+  }
+};
 
   useEffect(() => {
     if (!user) { router.push('/login'); return; }
@@ -135,7 +144,11 @@ export default function ReportsPage() {
                   type="date"
                   required
                   value={form.weekStart}
-                  onChange={(e) => setForm({ ...form, weekStart: e.target.value })}
+                  onChange={(e) => {
+                    const start = e.target.value;
+                    const end = start ? new Date(new Date(start).getTime() + 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : '';
+                    setForm({ ...form, weekStart: start, weekEnd: end });
+                  }}
                   className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
                 />
               </div>
@@ -209,13 +222,21 @@ export default function ReportsPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     {['DRAFT', 'NEEDS_CORRECTION'].includes(report.status) && (
-                      <button
-                        onClick={() => router.push(`/reports/${report.id}/edit`)}
-                        className="text-sm font-medium text-gray-900 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition"
-                      >
-                        Edit
-                      </button>
-                    )}
+  <button
+    onClick={() => router.push(`/reports/${report.id}/edit`)}
+    className="text-sm font-medium text-gray-900 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition"
+  >
+    Edit
+  </button>
+)}
+{report.status === 'DRAFT' && (
+  <button
+    onClick={() => handleDelete(report.id)}
+    className="text-sm font-medium text-red-600 border border-red-200 px-3 py-1.5 rounded-lg hover:bg-red-50 transition"
+  >
+    Delete
+  </button>
+)}
                     <button
                       onClick={() => router.push(`/reports/${report.id}`)}
                       className="text-sm font-medium text-gray-900 bg-gray-100 px-3 py-1.5 rounded-lg hover:bg-gray-200 transition"

@@ -161,7 +161,6 @@ export class ReportsService {
       _count: { id: true },
     });
 
-    // --- Compliance rate: submitted+approved+needsCorrection vs draft(pending) vs late ---
     const totalReports = totalSubmitted + needsCorrection + approved + draft;
     const now = new Date();
     const lateDrafts = await this.prisma.report.count({
@@ -177,7 +176,6 @@ export class ReportsService {
         : 0,
     };
 
-    // --- Time spent by task type (team-wide) ---
     const hoursData = await this.prisma.hoursBreakdown.groupBy({
       by: ['taskType'],
       _sum: { hours: true },
@@ -187,7 +185,6 @@ export class ReportsService {
       hours: h._sum.hours || 0,
     }));
 
-    // --- Workload / task distribution by project ---
     const projectReports = await this.prisma.report.groupBy({
       by: ['projectId'],
       _count: { id: true },
@@ -201,7 +198,6 @@ export class ReportsService {
       };
     });
 
-    // --- Recent activity feed ---
     const recentActivity = await this.prisma.reportStatusHistory.findMany({
       take: 10,
       orderBy: { createdAt: 'desc' },
@@ -236,19 +232,16 @@ export class ReportsService {
   async getTeamStatusForWeek(weekStart: string) {
     const start = new Date(weekStart);
 
-    // Get all team members (not managers)
     const teamMembers = await this.prisma.user.findMany({
       include: { role: true },
     });
     const members = teamMembers.filter(u => u.role?.name === 'TEAM_MEMBER');
 
-    // Get all reports for that exact week
     const reports = await this.prisma.report.findMany({
       where: { weekStart: start },
       include: { project: true },
     });
 
-    // Map each member to their report status (or NOT_STARTED)
     const statusList = members.map(member => {
       const report = reports.find(r => r.userId === member.id);
       return {
@@ -263,39 +256,48 @@ export class ReportsService {
 
     return statusList;
   }
-  async getTeamSectionData(weekStart: string, section: string) {
-  const start = new Date(weekStart);
 
-  const reports = await this.prisma.report.findMany({
-    where: {
-      weekStart: start,
-      status: { in: ['SUBMITTED', 'NEEDS_CORRECTION', 'APPROVED'] },
-    },
-    include: {
-      user: true,
-      project: true,
-      versions: {
-        orderBy: { versionNumber: 'desc' },
-        take: 1,
-        include: {
-          blockers: true,
-          achievements: true,
-          plannedTasks: true,
+  async getTeamSectionData(weekStart: string, section: string) {
+    const start = new Date(weekStart);
+
+    const reports = await this.prisma.report.findMany({
+      where: {
+        weekStart: start,
+        status: { in: ['SUBMITTED', 'NEEDS_CORRECTION', 'APPROVED'] },
+      },
+      include: {
+        user: true,
+        project: true,
+        versions: {
+          orderBy: { versionNumber: 'desc' },
+          take: 1,
+          include: {
+            blockers: true,
+            achievements: true,
+            plannedTasks: true,
+          },
         },
       },
-    },
-  });
+    });
 
-  return reports.map(r => {
-    const v = r.versions[0];
-    return {
-      userId: r.userId,
-      name: r.user?.name,
-      project: r.project?.name,
-      blockers: v?.blockers || [],
-      achievements: v?.achievements || [],
-      nextWeekTasks: v?.plannedTasks || [],
-    };
-  });
-}
+    return reports.map(r => {
+      const v = r.versions[0];
+      return {
+        userId: r.userId,
+        name: r.user?.name,
+        project: r.project?.name,
+        blockers: v?.blockers || [],
+        achievements: v?.achievements || [],
+        nextWeekTasks: v?.plannedTasks || [],
+      };
+    });
+  }
+
+  async deleteReport(reportId: string, userId: string) {
+    const report = await this.prisma.report.findUnique({ where: { id: reportId } });
+    if (!report) throw new NotFoundException('Report not found');
+    if (report.userId !== userId) throw new ForbiddenException('Access denied');
+    if (report.status !== 'DRAFT') throw new ForbiddenException('Only draft reports can be deleted');
+    return this.prisma.report.delete({ where: { id: reportId } });
+  }
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Body, Query, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Param, Body, Query, UseGuards, Request } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ReportsService } from './reports.service';
 import { RolesGuard } from '../auth/roles.guard';
@@ -37,13 +37,13 @@ export class ReportsController {
   }
 
   @Get('team-section')
-@Roles('MANAGER')
-getTeamSection(
-  @Query('weekStart') weekStart: string,
-  @Query('section') section: string,
-) {
-  return this.reportsService.getTeamSectionData(weekStart, section);
-}
+  @Roles('MANAGER')
+  getTeamSection(
+    @Query('weekStart') weekStart: string,
+    @Query('section') section: string,
+  ) {
+    return this.reportsService.getTeamSectionData(weekStart, section);
+  }
 
   @Get(':id')
   getReportById(@Param('id') id: string, @Request() req: any) {
@@ -59,5 +59,10 @@ getTeamSection(
   @Roles('MANAGER')
   reviewReport(@Param('id') id: string, @Request() req: any, @Body() body: any) {
     return this.reportsService.reviewReport(id, req.user.id, body.action, body.comment);
+  }
+
+  @Delete(':id')
+  deleteReport(@Param('id') id: string, @Request() req: any) {
+    return this.reportsService.deleteReport(id, req.user.id);
   }
 }
